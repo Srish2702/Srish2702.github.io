@@ -22,6 +22,10 @@ body {
     padding: 1.5rem;
 }
 
+.mob-sidebar {
+    display: none;
+}
+
 /* Navigation */
 .top-nav {
     position: fixed;
@@ -449,6 +453,16 @@ h2 {
         display: none;
     }
 
+    .mob-sidebar {
+        display: grid;
+        align-items: center;
+        text-align: center;
+    }
+
+    .contact-info {
+        align-items: center;
+    }
+
     .main-content {
         margin-left: 0; /* Remove the margin on mobile */
         margin-top: 4rem; /* Adjust the top margin for better spacing */
@@ -467,6 +481,16 @@ h2 {
     .testimonials-grid,
     .portfolio-grid {
         grid-template-columns: 1fr;
+    }
+
+    .mob-sidebar {
+        display: grid;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .contact-info {
+        align-items: center;
     }
 
     .card {
