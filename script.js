@@ -125,7 +125,7 @@
             $('#' + tabName).addClass('active');
         });
     
-        const CACHE_DURATION = 24 * 60 * 60 * 1000;
+        const CACHE_DURATION = 2 * 60 * 60 * 1000;
     
         const loadFromLocalStorageOrApi = (key, url, callback) => {
             const cachedItem = localStorage.getItem(key);
