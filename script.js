@@ -132,11 +132,38 @@
             url: 'https://srishti.raju.serv00.net/api/about',
             type: 'get',
             success: function(response) {
-                const data = response;
-                $('.about-me').append(`
-                    <h2>About Me</h2>
-                    ${data}
-                `);
+                const container = $('.about-me');
+                container.empty();
+                container.append('<h2>About Me</h2><div class="typing-text"></div>');
+        
+                const htmlString = response;
+                const tempDiv = $('<div>').html(htmlString);
+                const elements = tempDiv.contents();
+        
+                function typeElement(index) {
+                    if (index >= elements.length) return;
+        
+                    const el = elements[index];
+                    const $el = $(el).clone();
+                    $('.typing-text').append($el);
+
+                    const content = $el.text();
+                    $el.empty();
+        
+                    let charIndex = 0;
+                    function typeChar() {
+                        if (charIndex < content.length) {
+                            $el.append(content.charAt(charIndex));
+                            charIndex++;
+                            setTimeout(typeChar, 10);
+                        } else {
+                            typeElement(index + 1);
+                        }
+                    }
+                    typeChar();
+                }
+        
+                typeElement(0);
             }
         });
         $.ajax({
