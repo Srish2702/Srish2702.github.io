@@ -162,6 +162,7 @@
                 let portfolioHtml = '';
                 portfolioData.push(...data);
                 data.forEach(function(item) {
+                    $portfolioGrid.empty();
                     $portfolioGrid.append(`
                         <div class="portfolio-item" data-id="${item.id}">
                             <img src="${item.coverpic}" alt="${item.title}">
