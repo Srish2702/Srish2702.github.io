@@ -107,110 +107,120 @@
 
     });
     
-    $(document).ready(function() {
-        const $firstTab = $('.nav-link[data-tab="about"]');
-        if ($firstTab.length) {
-            $firstTab.addClass('active');
-        }
-
+    $(document).ready(() => {
         const $tabs = $('.nav-link');
-        $tabs.on('click', function() {
+        const $sections = $('.section');
+    
+        // Activate first tab
+        const $firstTab = $('.nav-link[data-tab="about"]');
+        if ($firstTab.length) $firstTab.addClass('active');
+    
+        // Tab click handler
+        $tabs.on('click', function () {
             $tabs.removeClass('active');
-
             $(this).addClass('active');
-            const $sections = $('.section');
-            $sections.removeClass('active');
-
+    
             const tabName = $(this).data('tab');
-            const $activeSection = $('#' + tabName);
-            if ($activeSection.length) {
-                $activeSection.addClass('active');
-            }
+            $sections.removeClass('active');
+            $('#' + tabName).addClass('active');
         });
     
-        $.ajax({
-            url: 'https://srishti.raju.serv00.net/api/about',
-            type: 'get',
-            success: function(response) {
-                const container = $('.about-me');
-                container.empty();
-                container.append('<h2>About Me</h2><div class="typing-text"></div>');
-        
-                const htmlString = response;
-                const tempDiv = $('<div>').html(htmlString);
-                const elements = tempDiv.contents();
-        
-                function typeElement(index) {
-                    if (index >= elements.length) return;
-        
-                    const el = elements[index];
-                    const $el = $(el).clone();
-                    $('.typing-text').append($el);
-
-                    const content = $el.text();
-                    $el.empty();
-        
-                    let charIndex = 0;
-                    function typeChar() {
-                        if (charIndex < content.length) {
-                            $el.append(content.charAt(charIndex));
-                            charIndex++;
-                            setTimeout(typeChar, 10);
-                        } else {
-                            typeElement(index + 1);
-                        }
-                    }
-                    typeChar();
+        const CACHE_DURATION = 24 * 60 * 60 * 1000;
+    
+        const loadFromLocalStorageOrApi = (key, url, callback) => {
+            const cachedItem = localStorage.getItem(key);
+    
+            if (cachedItem) {
+                const parsed = JSON.parse(cachedItem);
+                const now = Date.now();
+    
+                if (now - parsed.timestamp < CACHE_DURATION) {
+                    callback(parsed.data);
+                    return;
+                } else {
+                    localStorage.removeItem(key);
                 }
-        
-                typeElement(0);
             }
+    
+            // Fetch fresh data
+            $.get(url, (response) => {
+                const cacheObject = {
+                    timestamp: Date.now(),
+                    data: response
+                };
+                localStorage.setItem(key, JSON.stringify(cacheObject));
+                callback(response);
+            });
+        };
+    
+        // About Me Section with typing effect
+        loadFromLocalStorageOrApi('aboutData', 'https://srishti.raju.serv00.net/api/about', (response) => {
+            const container = $('.about-me');
+            container.empty();
+            container.append('<h2>About Me</h2><div class="typing-text"></div>');
+    
+            const htmlString = response;
+            const tempDiv = $('<div>').html(htmlString);
+            const elements = tempDiv.contents();
+    
+            function typeElement(index) {
+                if (index >= elements.length) return;
+    
+                const el = elements[index];
+                const $el = $(el).clone();
+                $('.typing-text').append($el);
+                const content = $el.text();
+                $el.empty();
+    
+                let charIndex = 0;
+                function typeChar() {
+                    if (charIndex < content.length) {
+                        $el.append(content.charAt(charIndex));
+                        charIndex++;
+                        setTimeout(typeChar, 10);
+                    } else {
+                        typeElement(index + 1);
+                    }
+                }
+                typeChar();
+            }
+    
+            typeElement(0);
         });
-        $.ajax({
-            url: 'https://srishti.raju.serv00.net/api/feedbacks',
-            type: 'get',
-            success: function(response) {
-                const data = response.data;
-                const $portfolioGrid = $('.testimonials-grid');
-                let portfolioHtml = '';
-                portfolioData.push(...data);
-                data.forEach(function(item) {
-                    $portfolioGrid.append(`
-                        <div class="testimonial-card">
+    
+        // Testimonials
+        loadFromLocalStorageOrApi('feedbacksData', 'https://srishti.raju.serv00.net/api/feedbacks', (response) => {
+            const data = response.data;
+            const $grid = $('.testimonials-grid');
+            $grid.empty();
+            data.forEach(item => {
+                $grid.append(`
+                    <div class="testimonial-card">
                         ${item.message}
                         <div class="testimonial-author">
-                            <img src="${item.img}" 
-                                 alt="${item.name}">
+                            <img src="${item.img}" alt="${item.name}">
                             <div>
                                 <strong>${item.name}</strong>
                                 <span>${item.deg}</span>
                             </div>
                         </div>
                     </div>
-                    `);
-                });
-            }
+                `);
+            });
         });
-        $.ajax({
-            url: 'https://srishti.raju.serv00.net/api/portfolio',
-            type: 'get',
-            success: function(response) {
-                const data = response.data;
-                const $portfolioGrid = $('.portfolio-grid');
-                let portfolioHtml = '';
-                portfolioData.push(...data);
-                data.forEach(function(item) {
-                    $portfolioGrid.empty();
-                    $portfolioGrid.append(`
-                        <div class="portfolio-item" data-id="${item.id}">
-                            <img src="${item.coverpic}" alt="image is Loading...">
-                            <!-- <div class="portfolio-overlay">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="eye" class="lucide lucide-eye"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                            </div> -->
-                        </div>
-                    `);
-                });
-            }
+    
+        // Portfolio
+        loadFromLocalStorageOrApi('portfolioData', 'https://srishti.raju.serv00.net/api/portfolio', (response) => {
+            const data = response.data;
+            const $grid = $('.portfolio-grid');
+            $grid.empty();
+            data.forEach(item => {
+                $grid.append(`
+                    <div class="portfolio-item" data-id="${item.id}">
+                        <img src="${item.coverpic}" alt="image is Loading...">
+                    </div>
+                `);
+            });
         });
     });
 

@@ -464,8 +464,8 @@ h2 {
     }
 
     .main-content {
-        margin-left: 0; /* Remove the margin on mobile */
-        margin-top: 4rem; /* Adjust the top margin for better spacing */
+        margin-left: 0;
+        margin-top: 4rem;
     }
 
     .top-nav {
@@ -473,6 +473,7 @@ h2 {
         right: 0;
         display: flex;
         justify-content: center;
+        backdrop-filter: blur(3px);
     }
 }
 
