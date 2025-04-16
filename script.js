@@ -30,13 +30,17 @@
     const portfolioData = [];
     
     
-    // $(document).on('click', '.portfolio-item', function() {
-    //     showModal($(this).data('id'));
-    // });
+    $(document).on('click', '.portfolio-item', function() {
+        showModal($(this).data('id'));
+    });
     function showModal(id) {
         const data = portfolioData.find(item => item.id == id);
         if (!data) {
             showToast("Something went wrong", 4000, 'error');;
+            return;
+        }
+        
+        if(data.info == null) {
             return;
         }
     
@@ -126,35 +130,58 @@
         });
     
         const CACHE_DURATION = 2 * 60 * 60 * 1000;
-    
+
         const loadFromLocalStorageOrApi = (key, url, callback) => {
-            const cachedItem = localStorage.getItem(key);
-    
-            if (cachedItem) {
-                const parsed = JSON.parse(cachedItem);
-                const now = Date.now();
-    
-                if (now - parsed.timestamp < CACHE_DURATION) {
-                    callback(parsed.data);
-                    return;
-                } else {
-                    localStorage.removeItem(key);
+            if (CAN_USE_LOCAL_STORAGE) {
+                try {
+                    const cachedItem = localStorage.getItem(key);
+                    if (cachedItem) {
+                        const parsed = JSON.parse(cachedItem);
+                        const now = Date.now();
+        
+                        if (now - parsed.timestamp < CACHE_DURATION) {
+                            callback(parsed.data);
+                            return;
+                        } else {
+                            localStorage.removeItem(key);
+                        }
+                    }
+                } catch (e) {
+                    console.warn(`Error accessing localStorage for ${key}:`, e);
                 }
             }
-    
-            // Fetch fresh data
+        
+            // Always fetch fresh data
             $.get(url, (response) => {
-                const cacheObject = {
-                    timestamp: Date.now(),
-                    data: response
-                };
-                localStorage.setItem(key, JSON.stringify(cacheObject));
+                if (CAN_USE_LOCAL_STORAGE) {
+                    try {
+                        const cacheObject = {
+                            timestamp: Date.now(),
+                            data: response
+                        };
+                        localStorage.setItem(key, JSON.stringify(cacheObject));
+                    } catch (e) {
+                        console.warn(`Failed to save ${key} to localStorage:`, e);
+                    }
+                }
                 callback(response);
             });
         };
+
+        const CAN_USE_LOCAL_STORAGE = (() => {
+            try {
+                const testKey = '__storage_test__';
+                window.localStorage.setItem(testKey, testKey);
+                window.localStorage.removeItem(testKey);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        })();
     
         // About Me Section with typing effect
         loadFromLocalStorageOrApi('aboutData', 'https://srishti.raju.serv00.net/api/about', (response) => {
+            portfolioData.push(...response.data);
             const container = $('.about-me');
             container.empty();
             container.append('<h2>About Me</h2><div class="typing-text"></div>');
@@ -191,6 +218,7 @@
         // Testimonials
         loadFromLocalStorageOrApi('feedbacksData', 'https://srishti.raju.serv00.net/api/feedbacks', (response) => {
             const data = response.data;
+            portfolioData.push(...data);
             const $grid = $('.testimonials-grid');
             $grid.empty();
             data.forEach(item => {
@@ -212,6 +240,7 @@
         // Portfolio
         loadFromLocalStorageOrApi('portfolioData', 'https://srishti.raju.serv00.net/api/portfolio', (response) => {
             const data = response.data;
+            portfolioData.push(...data);
             const $grid = $('.portfolio-grid');
             $grid.empty();
             data.forEach(item => {
