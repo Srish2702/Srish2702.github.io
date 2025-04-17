@@ -1,6 +1,8 @@
 (function() {
     // Initialize Lucide icons
     lucide.createIcons();
+
+    const URL = "https://srishti.raju.serv00.net";
     
     // Navigation
     const $navLinks = $('.nav-link');
@@ -85,7 +87,7 @@
         showToast("Please wait, Message Sending...", 4000, 'info');
 
         $.ajax({
-            url: 'https://srishti.raju.serv00.net/api/contect-me',
+            url: URL+'/api/contect-me',
             type: 'POST',
             data: {
                 name,
@@ -180,8 +182,8 @@
         })();
     
         // About Me Section with typing effect
-        loadFromLocalStorageOrApi('aboutData', 'https://srishti.raju.serv00.net/api/about', (response) => {
-            portfolioData.push(...response.data);
+        loadFromLocalStorageOrApi('aboutData', URL+'/api/about', (response) => {
+            portfolioData.push({about: response});
             const container = $('.about-me');
             container.empty();
             container.append('<h2>About Me</h2><div class="typing-text"></div>');
@@ -216,7 +218,7 @@
         });
     
         // Testimonials
-        loadFromLocalStorageOrApi('feedbacksData', 'https://srishti.raju.serv00.net/api/feedbacks', (response) => {
+        loadFromLocalStorageOrApi('feedbacksData', URL+'/api/feedbacks', (response) => {;
             const data = response.data;
             portfolioData.push(...data);
             const $grid = $('.testimonials-grid');
@@ -238,7 +240,7 @@
         });
     
         // Portfolio
-        loadFromLocalStorageOrApi('portfolioData', 'https://srishti.raju.serv00.net/api/portfolio', (response) => {
+        loadFromLocalStorageOrApi('portfolioData', URL+'/api/portfolio', (response) => {
             const data = response.data;
             portfolioData.push(...data);
             const $grid = $('.portfolio-grid');
